@@ -32,42 +32,37 @@ public class StartupTask {
         requestBody.put("email", "john@example.com");
 
         try {
-            // Step 1: Generate webhook and token
             ResponseEntity<Map> response = restTemplate.postForEntity(generateUrl, requestBody, Map.class);
 
             String webhook = (String) response.getBody().get("webhook");
             String accessToken = (String) response.getBody().get("accessToken");
 
-            System.out.println("✅ Webhook URL: " + webhook);
-            System.out.println("✅ Access Token: " + accessToken);
+            System.out.println("Webhook URL: " + webhook);
+            System.out.println("Access Token: " + accessToken);
 
-            // Step 2: Final SQL query from Question 1
             String finalQuery = "SELECT patient_id FROM visits WHERE visit_date BETWEEN '2022-01-01' AND '2022-03-31' GROUP BY patient_id HAVING COUNT(DISTINCT department_id) = 3";
 
             Map<String, String> answer = new HashMap<>();
             answer.put("finalQuery", finalQuery);
 
-            // Step 3: Prepare headers
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
             headers.set("Authorization", "Bearer " + accessToken);
 
-            // Step 4: Serialize body manually
             ObjectMapper objectMapper = new ObjectMapper();
             String jsonBody = objectMapper.writeValueAsString(answer);
-            System.out.println("📦 JSON Body being sent: " + jsonBody);
+            System.out.println("JSON Body being sent: " + jsonBody);
 
             HttpEntity<String> httpEntity = new HttpEntity<>(jsonBody, headers);
 
-            // Step 5: Send to webhook
-            System.out.println("📤 Sending final query...");
+            System.out.println("Sending final query...");
             ResponseEntity<String> result = restTemplate.postForEntity(webhook, httpEntity, String.class);
 
-            System.out.println("🚀 Submission Response: " + result.getStatusCode() + " → " + result.getBody());
+            System.out.println("Submission Response: " + result.getStatusCode() + " → " + result.getBody());
 
         } catch (Exception e) {
-            System.err.println("❌ Error during submission:");
+            System.err.println("Error during submission:");
             e.printStackTrace();
         }
     }
